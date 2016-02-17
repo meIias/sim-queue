@@ -19,6 +19,11 @@ public class GlobalEventList {
         this._tail = null;
     }
 
+    /**
+     * insert new event into GEL in its appropriate location
+     *
+     * @param event new event
+     */
     public void insert(Event event) {
 
         if(_head == null) {
@@ -60,16 +65,18 @@ public class GlobalEventList {
         _length++;
     }
 
-    /*
-     * get first event from gel
+    /**
+     * get first event from GEL
+     *
+     * @return event
      */
     public Event getFirstEvent() {
 
         return _head;
     }
 
-    /*
-     * remove the first event
+    /**
+     * remove front event from GEL
      */
     public void remove() {
 

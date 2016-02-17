@@ -12,6 +12,11 @@ import static java.lang.Math.log;
 public class Simulation {
 
     /**
+     * max number of packets
+     */
+    private double  _maxBuffer;
+
+    /**
      * to generate inter-arrival time. λ
      */
     private double _interArrivalRate;
@@ -56,9 +61,9 @@ public class Simulation {
      */
     private LinkedList<Packet> _packetQueue;
 
-    public void runSimulation(double interArrivalRate, double transmissionRate) {
+    public void runSimulation(double interArrivalRate, double transmissionRate, double maxBuffer) {
 
-        initialize(interArrivalRate, transmissionRate);
+        initialize(interArrivalRate, transmissionRate, maxBuffer);
 
         /**
          * 1. get the first event from the GEL;
@@ -76,17 +81,22 @@ public class Simulation {
             }
             else {
 
-                processDepartureEvent();
+                processDepartureEvent(event);
             }
         }
 
         outputStatistics();
     }
 
-    private void processDepartureEvent() {
+    private void processDepartureEvent(Event event) {
         //todo charlie
     }
 
+    /**
+     * process arrival event
+     *
+     * @param event event at front of GEL
+     */
     private void processArrivalEvent(Event event) {
 
         _time = event.getTime();
@@ -97,28 +107,55 @@ public class Simulation {
         // create a new packet with its service time
         double newPacketServiceTime = negativeExponentiallyDistributedTime(_transmissionRate);
         Packet newPacket = new Packet(newPacketServiceTime);
-        _packetQueue.push(newPacket);
 
         // create and insert a new arrival time
         _globalEventList.insert(new Event(nextArrivalTime, "arrival"));
+
+        // process the arrive event
+        if(_length == 0) {
+
+            // server is free, immediately schedule for transmission
+
+            // new departure time is packet service time plus current time
+            double departureEventTime = newPacket.getServiceTime() + _time;
+
+            // insert new departure event
+            _globalEventList.insert(new Event(departureEventTime, "departure"));
+        }
+        else if(_length > 0) {
+
+            // server is busy, queue
+
+            if(_length < _maxBuffer) {
+
+                // add packet to queue
+                _packetQueue.push(newPacket);
+            }
+            else {
+
+                // drop packet
+                _numPacketsDropped++;
+            }
+
+            _length++;
+
+            // update stats
+            _serverUtilization += _time;
+            // mean queue length needs to update, idk how rn
+        }
     }
 
     /**
-     * Initialize
+     * initialize all variables, insert first event into GEL
      *
-     * Initialize all the data structures.
-     * Initialize all the counters for maintaining the statistics.
-     * Let length denote the number of packets in the queue (including, if any, being transmitted by the server).
-     * We will initialize length to be 0.
-     * Variable time to denote the current time. We initialize time to 0.
-     *
-     * Set the service rate and the arrival rate of the packets.
-     *
-     * Create the first arrival event and then insert it into the GEL.
-     * The event time of the first arrival event is obtained by adding a
-     * randomly generated inter-arrival time to the current time, which is 0.
+     * @param interArrivalRate  λ
+     * @param transmissionRate  μ
+     * @param maxBuffer         max num packets allowed in queue
      */
-    private void initialize(double interArrivalRate, double transmissionRate) {
+    private void initialize(double interArrivalRate, double transmissionRate, double maxBuffer) {
+
+        // max num packets
+        _maxBuffer = maxBuffer;
 
         // init data structures
         _time = 0;
@@ -160,7 +197,10 @@ public class Simulation {
     }
 
     /**
-     * The code for generating the random variables
+     * random variable following negative exponential distribution
+     *
+     * @param rate  λ or μ
+     * @return      random variable
      */
     private double negativeExponentiallyDistributedTime(double rate) {
 
