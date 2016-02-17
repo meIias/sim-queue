@@ -101,28 +101,22 @@ public class GlobalEventList {
     }
 
     /**
-     * get first event from GEL
-     *
-     * @return event
-     */
-    public Event getFirstEvent() {
-
-        return _head;
-    }
-
-    /**
      * remove front event from GEL
      */
-    public void remove() {
+    public Event removeFront() {
 
         if (_length == 0) {
-            return;
+            return null;
         }
+
+        Event oldHeadEvent = _head;
 
         _head = _head.getNext();
         _head.setPrevious(null);
 
         _length--;
+
+        return oldHeadEvent;
     }
 
     public int getLength() {

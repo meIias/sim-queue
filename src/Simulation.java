@@ -73,7 +73,7 @@ public class Simulation {
          */
         for(int i = 0; i < 100000; i++) {
 
-            Event event = _globalEventList.getFirstEvent();
+            Event event = _globalEventList.removeFront();
 
             if(event.getType().equals("arrival")) {
 
