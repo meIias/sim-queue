@@ -1,4 +1,7 @@
 import java.util.LinkedList;
+import java.util.Random;
+
+import static java.lang.Math.log;
 
 /**
  * Simulation class
@@ -9,9 +12,19 @@ import java.util.LinkedList;
 public class Simulation {
 
     /**
+     * to generate inter-arrival time. λ
+     */
+    private double _interArrivalRate;
+
+    /**
+     * to generate packet transmission/service time. μ
+     */
+    private double _transmissionRate;
+
+    /**
      * current time
      */
-    private int _time;
+    private double _time;
 
     /**
      * number of packets in queue
@@ -21,12 +34,12 @@ public class Simulation {
     /**
      * What fraction of the time is the server busy
      */
-    private float _serverUtilization;
+    private double _serverUtilization;
 
     /**
      * mean number of packets in the queue as seen by a new arriving packet
      */
-    private float _meanQueueLength;
+    private double _meanQueueLength;
 
     /**
      * Number of packets dropped with different λ values
@@ -43,9 +56,9 @@ public class Simulation {
      */
     private LinkedList<Packet> _packetQueue;
 
-    public void runSimulation() {
+    public void runSimulation(double interArrivalRate, double transmissionRate) {
 
-        initialize();
+        initialize(interArrivalRate, transmissionRate);
 
         /**
          * 1. get the first event from the GEL;
@@ -93,8 +106,9 @@ public class Simulation {
      * The event time of the first arrival event is obtained by adding a
      * randomly generated inter-arrival time to the current time, which is 0.
      */
-    private void initialize() {
+    private void initialize(double interArrivalRate, double transmissionRate) {
 
+        // init data structures
         _time = 0;
         _length = 0;
         _meanQueueLength = 0;
@@ -103,7 +117,13 @@ public class Simulation {
         _packetQueue = new LinkedList<Packet>();
         _globalEventList = new GlobalEventList();
 
-        // more todo
+        // init packet arrival and service times
+        _interArrivalRate = interArrivalRate;
+        _transmissionRate = transmissionRate;
+
+        // init gel w/ first event
+        double firstEventTime = _time + negativeExponentiallyDistributedTime(_interArrivalRate);
+        _globalEventList.insert(firstEventTime, "arrival");
     }
 
     /**
@@ -125,6 +145,18 @@ public class Simulation {
      */
     private void outputStatistics() {
         //todo
+    }
+
+    /**
+     * The code for generating the random variables
+     */
+    private double negativeExponentiallyDistributedTime(double rate) {
+
+        double u;
+        Random gen = new Random();
+        u = gen.nextDouble();
+
+        return((-1 / rate) * log(1 - u));
     }
 
     /**

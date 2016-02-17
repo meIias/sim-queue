@@ -10,7 +10,7 @@ public class Event {
      * packet arrives at the transmitter and for a departure event it is the
      * time when the server is finished transmitting the packet.
      */
-    private int _time;
+    private double _time;
 
     /**
      * Type of the event which can one of two types
@@ -24,7 +24,7 @@ public class Event {
     private Event _next;
     private Event _previous;
 
-    public Event(int time, String type) {
+    public Event(double time, String type) {
 
         this._time = time;
         this._type = type;
@@ -33,7 +33,7 @@ public class Event {
         this._previous = null;
     }
 
-    public int getTime() {
+    public double getTime() {
         return _time;
     }
 
@@ -49,7 +49,7 @@ public class Event {
         return _previous;
     }
 
-    public void setTime(int _time) {
+    public void setTime(double _time) {
         this._time = _time;
     }
 

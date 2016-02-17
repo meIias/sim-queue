@@ -19,7 +19,7 @@ public class GlobalEventList {
         this._tail = null;
     }
 
-    public void insert(int time, String type) {
+    public void insert(double time, String type) {
 
         if(_head == null) {
 
