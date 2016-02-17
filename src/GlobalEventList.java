@@ -1,5 +1,3 @@
-import java.util.Date;
-
 /**
  * GlobalEventList class
  * This will maintain all the events sorted in increasing order of time.
@@ -21,7 +19,7 @@ public class GlobalEventList {
         this._tail = null;
     }
 
-    public void insert(Date time, String type) {
+    public void insert(int time, String type) {
 
         if(_head == null) {
 
@@ -33,7 +31,7 @@ public class GlobalEventList {
             // insert based on ordering by time
 
             Event current = _head;
-            while(current.getTime().before(time)) {
+            while(current.getTime() < time) {
 
                 current = current.getNext();
 
