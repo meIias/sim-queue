@@ -36,30 +36,65 @@ public class GlobalEventList {
             // insert based on ordering by time
 
             Event current = _head;
-            while(current.getTime() < event.getTime()) {
+            while(current.getTime() <= event.getTime()) {
+
+                if(current.getNext() == null || current.getNext().getTime() > event.getTime()) {
+                    break;
+                }
 
                 current = current.getNext();
-
-                if(current == null) {
-                    return;
-                }
             }
 
-            Event newEvent = event;
+            if(current.getPrevious() == null) {
 
-            if(current == _tail) {
+                // insert head area
 
-                newEvent.setNext(null);
-                _tail = newEvent;
+                if(current.getTime() > event.getTime()) {
+
+                    // insert before
+                    current.setPrevious(event);
+                    event.setPrevious(null);
+                    event.setNext(current);
+                    _head = event;
+                }
+                else {
+
+                    // insert after
+                    event.setNext(_head.getNext());
+                    _head.getNext().setPrevious(event);
+                    _head.setNext(event);
+                    event.setPrevious(_head);
+                }
+            }
+            else if(current.getTime() <= event.getTime()) {
+
+                // insert somewhere in the list other than head
+
+                //insert after
+
+                if(current == _tail) {
+
+                    event.setNext(null);
+                    event.setPrevious(current);
+                    current.setNext(event);
+                    _tail = event;
+                }
+                else {
+
+                    event.setNext(current.getNext());
+                    current.getNext().setPrevious(event);
+                    event.setPrevious(current);
+                    current.setNext(event);
+                }
             }
             else {
 
-                newEvent.setNext(current.getNext());
-                current.getNext().setPrevious(newEvent);
-            }
+                //insert before
 
-            newEvent.setPrevious(current);
-            current.setNext(newEvent);
+                event.setNext(current);
+                event.setPrevious(current.getPrevious());
+                current.setPrevious(event);
+            }
         }
 
         _length++;
@@ -85,6 +120,7 @@ public class GlobalEventList {
         }
 
         _head = _head.getNext();
+        _head.setPrevious(null);
 
         _length--;
     }
