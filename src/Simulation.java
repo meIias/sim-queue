@@ -75,6 +75,12 @@ public class Simulation {
 
             Event event = _globalEventList.removeFront();
 
+            // no more events
+            if(event == null) {
+
+                break;
+            }
+
             if(event.getType().equals("arrival")) {
 
                 processArrivalEvent(event);
@@ -99,6 +105,7 @@ public class Simulation {
      */
     private void processArrivalEvent(Event event) {
 
+        double oldTime = _time;
         _time = event.getTime();
 
         // find time of next arrival
@@ -141,7 +148,7 @@ public class Simulation {
 
             // update stats
             _serverUtilization += _time;
-            // mean queue length needs to update, idk how rn
+            _meanQueueLength += (_length * (_time - oldTime));
         }
     }
 
@@ -178,22 +185,15 @@ public class Simulation {
     /**
      * Collecting Statistics
      *
-     * Utilization: What fraction of the time is the server busy?
-     * To determine this, keep a running count of the time the server is busy
-     * When the simulation terminates, the time for which the server is busy
-     * divided by the total time will give the mean server utilization.
-     *
-     * Mean queue length: What is the mean number of packets in the queue as
-     * seen by a new arriving packet?
-     * As mentioned before, to do this we maintain the sum of the area under the curve and when the simulation terminates,
-     * the area divided by the total time will give the mean queue length.
-     *
-     * Number of packets dropped: What is the total number of packets dropped with different λ values?
-     * To determine this, keep a running count of the number of packets dropped.
-     * Notice that you have to determine whether the packet needs to be dropped when it arrives at the buffer.
+     * Mean queue length, server utilization, num packets dropped
      */
     private void outputStatistics() {
-        //todo
+
+        System.out.println("Server utilization: " + (_serverUtilization / _time));
+
+        System.out.println("Mean queue length: " + (_meanQueueLength / _time));
+
+        System.out.println("Number of packets dropped: " + _numPacketsDropped + "\n");
     }
 
     /**
