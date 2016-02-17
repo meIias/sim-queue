@@ -1,3 +1,5 @@
+import java.util.LinkedList;
+
 /**
  * Simulation class
  * discrete-event simulation model
@@ -6,7 +8,42 @@
  */
 public class Simulation {
 
-    public static void runSimulation() {
+    /**
+     * current time
+     */
+    private int _time;
+
+    /**
+     * number of packets in queue
+     */
+    private int _length;
+
+    /**
+     * What fraction of the time is the server busy
+     */
+    private float _serverUtilization;
+
+    /**
+     * mean number of packets in the queue as seen by a new arriving packet
+     */
+    private float _meanQueueLength;
+
+    /**
+     * Number of packets dropped with different λ values
+     */
+    private int _numPacketsDropped;
+
+    /**
+     * instance of gel to keep track of events
+     */
+    private GlobalEventList _globalEventList;
+
+    /**
+     * fifo queue for packets
+     */
+    private LinkedList<Packet> _packetQueue;
+
+    public void runSimulation() {
 
         initialize();
 
@@ -18,10 +55,27 @@ public class Simulation {
          */
         for(int i = 0; i < 100000; i++) {
 
+            Event event = _globalEventList.getFirstEvent();
 
+            if(event.getType().equals("arrival")) {
+
+                processArrivalEvent();
+            }
+            else {
+
+                processDepartureEvent();
+            }
         }
 
         outputStatistics();
+    }
+
+    private void processDepartureEvent() {
+        //todo charlie
+    }
+
+    private void processArrivalEvent() {
+        //todo moe
     }
 
     /**
@@ -39,8 +93,17 @@ public class Simulation {
      * The event time of the first arrival event is obtained by adding a
      * randomly generated inter-arrival time to the current time, which is 0.
      */
-    private static void initialize() {
-        //todo
+    private void initialize() {
+
+        _time = 0;
+        _length = 0;
+        _meanQueueLength = 0;
+        _serverUtilization = 0;
+        _numPacketsDropped = 0;
+        _packetQueue = new LinkedList<Packet>();
+        _globalEventList = new GlobalEventList();
+
+        // more todo
     }
 
     /**
@@ -60,7 +123,20 @@ public class Simulation {
      * To determine this, keep a running count of the number of packets dropped.
      * Notice that you have to determine whether the packet needs to be dropped when it arrives at the buffer.
      */
-    private static void outputStatistics() {
+    private void outputStatistics() {
         //todo
+    }
+
+    /**
+     * Packet class
+     */
+    private class Packet {
+
+        int _sequenceNumber;
+
+        public Packet(int num) {
+
+            this._sequenceNumber = num;
+        }
     }
 }

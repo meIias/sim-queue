@@ -61,6 +61,14 @@ public class GlobalEventList {
     }
 
     /*
+     * get first event from gel
+     */
+    public Event getFirstEvent() {
+
+        return _head;
+    }
+
+    /*
      * remove the first event
      */
     public void remove() {
