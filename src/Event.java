@@ -1,5 +1,7 @@
 /**
- * Created by moeelias on 2/16/16.
+ * Event class
+ *
+ * Authors: Muhammad Elias, Charlie Ng
  */
 public class Event {
 
@@ -31,35 +33,35 @@ public class Event {
         this._previous = null;
     }
 
-    public String get_time() {
+    public String getTime() {
         return _time;
     }
 
-    public String get_type() {
+    public String getType() {
         return _type;
     }
 
-    public Event get_next() {
+    public Event getNext() {
         return _next;
     }
 
-    public Event get_previous() {
+    public Event getPrevious() {
         return _previous;
     }
 
-    public void set_time(String _time) {
+    public void setTime(String _time) {
         this._time = _time;
     }
 
-    public void set_type(String _type) {
+    public void setType(String _type) {
         this._type = _type;
     }
 
-    public void set_next(Event _next) {
+    public void setNext(Event _next) {
         this._next = _next;
     }
 
-    public void set_previous(Event _previous) {
+    public void setPrevious(Event _previous) {
         this._previous = _previous;
     }
 }
