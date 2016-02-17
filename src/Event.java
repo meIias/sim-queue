@@ -1,3 +1,5 @@
+import java.util.Date;
+
 /**
  * Event class
  *
@@ -10,7 +12,7 @@ public class Event {
      * packet arrives at the transmitter and for a departure event it is the
      * time when the server is finished transmitting the packet.
      */
-    private String _time;
+    private Date _time;
 
     /**
      * Type of the event which can one of two types
@@ -24,7 +26,7 @@ public class Event {
     private Event _next;
     private Event _previous;
 
-    public Event(String time, String type) {
+    public Event(Date time, String type) {
 
         this._time = time;
         this._type = type;
@@ -33,7 +35,7 @@ public class Event {
         this._previous = null;
     }
 
-    public String getTime() {
+    public Date getTime() {
         return _time;
     }
 
@@ -49,7 +51,7 @@ public class Event {
         return _previous;
     }
 
-    public void setTime(String _time) {
+    public void setTime(Date _time) {
         this._time = _time;
     }
 
