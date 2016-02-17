@@ -189,6 +189,8 @@ public class Simulation {
      */
     private void outputStatistics() {
 
+        System.out.println("λ: " + _interArrivalRate + "   μ: " + _transmissionRate + "   max_buffer: " + _maxBuffer);
+
         System.out.println("Server utilization: " + (_serverUtilization / _time));
 
         System.out.println("Mean queue length: " + (_meanQueueLength / _time));

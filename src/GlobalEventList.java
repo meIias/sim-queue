@@ -61,7 +61,12 @@ public class GlobalEventList {
 
                     // insert after
                     event.setNext(_head.getNext());
-                    _head.getNext().setPrevious(event);
+
+                    if(_head.getNext() != null) {
+
+                        _head.getNext().setPrevious(event);
+                    }
+
                     _head.setNext(event);
                     event.setPrevious(_head);
                 }
@@ -82,7 +87,12 @@ public class GlobalEventList {
                 else {
 
                     event.setNext(current.getNext());
-                    current.getNext().setPrevious(event);
+
+                    if(current.getNext() != null) {
+
+                        current.getNext().setPrevious(event);
+                    }
+
                     event.setPrevious(current);
                     current.setNext(event);
                 }
@@ -112,7 +122,11 @@ public class GlobalEventList {
         Event oldHeadEvent = _head;
 
         _head = _head.getNext();
-        _head.setPrevious(null);
+
+        if(_head != null) {
+
+            _head.setPrevious(null);
+        }
 
         _length--;
 
