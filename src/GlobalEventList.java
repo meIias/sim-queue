@@ -19,11 +19,11 @@ public class GlobalEventList {
         this._tail = null;
     }
 
-    public void insert(double time, String type) {
+    public void insert(Event event) {
 
         if(_head == null) {
 
-            _head = new Event(time, type);
+            _head = event;
             _tail = _head;
         }
         else {
@@ -31,7 +31,7 @@ public class GlobalEventList {
             // insert based on ordering by time
 
             Event current = _head;
-            while(current.getTime() < time) {
+            while(current.getTime() < event.getTime()) {
 
                 current = current.getNext();
 
@@ -40,7 +40,7 @@ public class GlobalEventList {
                 }
             }
 
-            Event newEvent = new Event(time, type);
+            Event newEvent = event;
 
             if(current == _tail) {
 

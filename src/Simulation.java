@@ -72,7 +72,7 @@ public class Simulation {
 
             if(event.getType().equals("arrival")) {
 
-                processArrivalEvent();
+                processArrivalEvent(event);
             }
             else {
 
@@ -87,8 +87,20 @@ public class Simulation {
         //todo charlie
     }
 
-    private void processArrivalEvent() {
-        //todo moe
+    private void processArrivalEvent(Event event) {
+
+        _time = event.getTime();
+
+        // find time of next arrival
+        double nextArrivalTime = _time + negativeExponentiallyDistributedTime(_interArrivalRate);
+
+        // create a new packet with its service time
+        double newPacketServiceTime = negativeExponentiallyDistributedTime(_transmissionRate);
+        Packet newPacket = new Packet(newPacketServiceTime);
+        _packetQueue.push(newPacket);
+
+        // create and insert a new arrival time
+        _globalEventList.insert(new Event(nextArrivalTime, "arrival"));
     }
 
     /**
@@ -123,7 +135,7 @@ public class Simulation {
 
         // init gel w/ first event
         double firstEventTime = _time + negativeExponentiallyDistributedTime(_interArrivalRate);
-        _globalEventList.insert(firstEventTime, "arrival");
+        _globalEventList.insert(new Event(firstEventTime, "arrival"));
     }
 
     /**
@@ -157,18 +169,5 @@ public class Simulation {
         u = gen.nextDouble();
 
         return((-1 / rate) * log(1 - u));
-    }
-
-    /**
-     * Packet class
-     */
-    private class Packet {
-
-        int _sequenceNumber;
-
-        public Packet(int num) {
-
-            this._sequenceNumber = num;
-        }
     }
 }
