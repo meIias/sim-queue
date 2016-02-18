@@ -1,8 +1,6 @@
 import java.util.LinkedList;
 import java.util.Random;
 
-import static java.lang.Math.log;
-
 /**
  * Simulation class
  * discrete-event simulation model
@@ -210,6 +208,6 @@ public class Simulation {
         Random gen = new Random();
         u = gen.nextDouble();
 
-        return((-1 / rate) * log(1 - u));
+        return(((-1) / rate) * Math.log(1 - u));
     }
 }
