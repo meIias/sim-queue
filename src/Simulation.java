@@ -104,7 +104,6 @@ public class Simulation {
 
         // decrement the length since this is a packet departure
         _length--;
-        System.out.println(_length);
 
         // if queue
         if(_length > 0) {
@@ -117,7 +116,6 @@ public class Simulation {
 
             // insert new departure event
             _globalEventList.insert(new Event(departureEventTime, "departure"));
-
         }
         else if(_length == 0) {
 
@@ -127,9 +125,6 @@ public class Simulation {
 
             System.out.println("**** ERROR: queue length is negative ****");
         }
-
-
-
     }
 
     /**
@@ -162,6 +157,8 @@ public class Simulation {
 
             // insert new departure event
             _globalEventList.insert(new Event(departureEventTime, "departure"));
+
+            _length++;
         }
         else if(_length > 0) {
 
@@ -171,6 +168,7 @@ public class Simulation {
 
                 // add packet to queue
                 _packetQueue.push(newPacket);
+                _length++;
             }
             else {
 
@@ -178,10 +176,8 @@ public class Simulation {
                 _numPacketsDropped++;
             }
 
-            _length++;
-
             // update stats
-            _serverUtilization += _time;
+            _serverUtilization += newPacketServiceTime;
             _meanQueueLength += (_length * (_time - oldTime));
         }
     }
@@ -223,7 +219,7 @@ public class Simulation {
      */
     private void outputStatistics() {
 
-        System.out.println("λ: " + _interArrivalRate + "   μ: " + _transmissionRate + "   max_buffer: " + _maxBuffer);
+        System.out.println("λ: " + _interArrivalRate + "   μ: " + _transmissionRate + "   max_buffer: " + _maxBuffer + "   " + "time: " + _time);
 
         System.out.println("Server utilization: " + (_serverUtilization / _time));
 
