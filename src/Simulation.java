@@ -93,7 +93,43 @@ public class Simulation {
     }
 
     private void processDepartureEvent(Event event) {
-        //todo charlie
+
+        //set current time to event time
+        double oldTime = _time;
+        _time = event.getTime();
+
+        // update stats
+        _serverUtilization += _time;
+        _meanQueueLength += (_length * (_time - oldTime));
+
+        // decrement the length since this is a packet departure
+        _length--;
+        System.out.println(_length);
+
+        // if queue
+        if(_length > 0) {
+
+            // dequeue the first packet
+            Packet curPacket = _packetQueue.remove(0);
+
+            // new departure time is packet service time plus transmission time
+            double departureEventTime = _time + curPacket.getServiceTime();
+
+            // insert new departure event
+            _globalEventList.insert(new Event(departureEventTime, "departure"));
+
+        }
+        else if(_length == 0) {
+
+            //do nothing
+        }
+        else {
+
+            System.out.println("**** ERROR: queue length is negative ****");
+        }
+
+
+
     }
 
     /**
@@ -131,7 +167,7 @@ public class Simulation {
 
             // server is busy, queue
 
-            if(_length < _maxBuffer) {
+            if(_length - 1 < _maxBuffer) {
 
                 // add packet to queue
                 _packetQueue.push(newPacket);
