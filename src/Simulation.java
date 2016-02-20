@@ -99,7 +99,6 @@ public class Simulation {
         _time = event.getTime();
 
         // update stats
-        _serverUtilization += _time;
         _meanQueueLength += (_length * (_time - oldTime));
 
         // decrement the length since this is a packet departure
@@ -137,6 +136,11 @@ public class Simulation {
         double oldTime = _time;
         _time = event.getTime();
 
+        if(oldTime != 0) {
+
+            _meanQueueLength += (_length * (_time - oldTime));
+        }
+
         // find time of next arrival
         double nextArrivalTime = _time + negativeExponentiallyDistributedTime(_interArrivalRate);
 
@@ -159,26 +163,28 @@ public class Simulation {
             _globalEventList.insert(new Event(departureEventTime, "departure"));
 
             _length++;
+
+            // update stats
+            _serverUtilization += newPacketServiceTime;
         }
         else if(_length > 0) {
 
             // server is busy, queue
 
-            if(_length - 1 < _maxBuffer) {
+            if(_length < _maxBuffer) {
 
                 // add packet to queue
                 _packetQueue.push(newPacket);
                 _length++;
+
+                // update stats
+                _serverUtilization += newPacketServiceTime;
             }
             else {
 
                 // drop packet
                 _numPacketsDropped++;
             }
-
-            // update stats
-            _serverUtilization += newPacketServiceTime;
-            _meanQueueLength += (_length * (_time - oldTime));
         }
     }
 
