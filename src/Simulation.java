@@ -276,6 +276,6 @@ public class Simulation {
      */
     private int generateTokenHolder() {
 
-        return (new Random().nextInt(_numHosts) + 1);
+        return (new Random().nextInt(_numHosts));
     }
 }
