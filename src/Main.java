@@ -1,5 +1,7 @@
 public class Main {
 
+    private static boolean isP3;
+
     private static Simulation s;
 
     private static double[] EXPERIMENT1_LAMBDAS = {
@@ -16,30 +18,39 @@ public class Main {
 
     public static void main(String[] args) {
 
+        isP3 = true;
+
         s = new Simulation();
 
-        System.out.println("****** EXPERIMENT 1 ******");
-        runExperiment1();
+        if(!isP3) {
 
-        System.out.println("****** EXPERIMENT 3 ******");
-        runExperiment3();
-    }
+            System.out.println("****** EXPERIMENT 1 ******");
+            runExperiment1P1();
 
-    private static void runExperiment1() {
+            System.out.println("****** EXPERIMENT 3 ******");
+            runExperiment3P1();
+        }
+        else {
 
-        for(int i = 0; i < EXPERIMENT1_LAMBDAS.length; i++) {
-
-            s.runSimulation(EXPERIMENT1_LAMBDAS[i], 1, Double.POSITIVE_INFINITY);
+            // todo
         }
     }
 
-    private static  void runExperiment3() {
+    private static void runExperiment1P1() {
+
+        for(int i = 0; i < EXPERIMENT1_LAMBDAS.length; i++) {
+
+            s.runSimulation(1, EXPERIMENT1_LAMBDAS[i], 1, Double.POSITIVE_INFINITY);
+        }
+    }
+
+    private static  void runExperiment3P1() {
 
         for(int i = 0; i < EXPERIMENT3_LAMBDAS.length; i++) {
 
             for(int j = 0; j < EXPERIMENT3_BUFFERS.length; j++) {
 
-                s.runSimulation(EXPERIMENT3_LAMBDAS[i], 1, EXPERIMENT3_BUFFERS[j]);
+                s.runSimulation(1, EXPERIMENT3_LAMBDAS[i], 1, EXPERIMENT3_BUFFERS[j]);
             }
         }
     }

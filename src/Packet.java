@@ -1,3 +1,5 @@
+import java.util.Random;
+
 /**
  * Packet class
  *
@@ -5,14 +7,31 @@
  */
 public class Packet {
 
-    private double _serviceTime;
+    public double length;
+    public int destination;
+    public int hostAddress;
+    public double serviceTime;
 
     public Packet(double serviceTime) {
 
-        this._serviceTime = serviceTime;
+        this.serviceTime = serviceTime;
     }
 
-    public double getServiceTime() {
-        return _serviceTime;
+    public Packet(int numHosts, int hostAddress, double serviceTime) {
+
+        this.serviceTime = serviceTime;
+
+        this.hostAddress = hostAddress;
+
+        this.length = (new Random().nextInt(1518 - 64) + 64);
+
+        int dest = (new Random().nextInt(numHosts) + 1);
+        while(dest == this.hostAddress) {
+
+            dest = (new Random().nextInt(numHosts) + 1);
+        }
+        this.destination = dest;
     }
+
+    public double getServiceTime() { return serviceTime; }
 }

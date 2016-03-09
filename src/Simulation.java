@@ -10,6 +10,11 @@ import java.util.Random;
 public class Simulation {
 
     /**
+     * number of hosts in ring
+     */
+    private int _numHosts;
+
+    /**
      * max number of packets
      */
     private double  _maxBuffer;
@@ -59,9 +64,14 @@ public class Simulation {
      */
     private LinkedList<Packet> _packetQueue;
 
-    public void runSimulation(double interArrivalRate, double transmissionRate, double maxBuffer) {
+    /**
+     * store hosts
+     */
+    private LinkedList<Host> _hosts;
 
-        initialize(interArrivalRate, transmissionRate, maxBuffer);
+    public void runSimulation(int numHosts, double interArrivalRate, double transmissionRate, double maxBuffer) {
+
+        initialize(numHosts, interArrivalRate, transmissionRate, maxBuffer);
 
         /**
          * 1. get the first event from the GEL;
@@ -195,7 +205,15 @@ public class Simulation {
      * @param transmissionRate  μ
      * @param maxBuffer         max num packets allowed in queue
      */
-    private void initialize(double interArrivalRate, double transmissionRate, double maxBuffer) {
+    private void initialize(int numHosts, double interArrivalRate, double transmissionRate, double maxBuffer) {
+
+        _numHosts = numHosts;
+
+        // create hosts with addresses 1 - numHosts
+        for(int i = 1; i <= _numHosts; i++) {
+
+            _hosts.add(new Host(i));
+        }
 
         // max num packets
         _maxBuffer = maxBuffer;
