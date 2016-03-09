@@ -213,7 +213,7 @@ public class Simulation {
         Token.getInstance().setOwner(generateTokenHolder());
 
         // create hosts with addresses 1 - numHosts
-        for(int i = 1; i <= _numHosts; i++) {
+        for(int i = 0; i < _numHosts; i++) {
 
             _hosts.add(new Host(i));
         }

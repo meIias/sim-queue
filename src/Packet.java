@@ -25,10 +25,10 @@ public class Packet {
 
         this.length = (new Random().nextInt(1518 - 64) + 64);
 
-        int dest = (new Random().nextInt(numHosts) + 1);
+        int dest = (new Random().nextInt(numHosts));
         while(dest == this.hostAddress) {
 
-            dest = (new Random().nextInt(numHosts) + 1);
+            dest = (new Random().nextInt(numHosts));
         }
         this.destination = dest;
     }
