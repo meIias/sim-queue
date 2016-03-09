@@ -128,7 +128,7 @@ public class Simulation {
         }
         else if(_length == 0) {
 
-            //do nothing
+            // todo RELEASE TOKEN
         }
         else {
 
@@ -209,6 +209,9 @@ public class Simulation {
 
         _numHosts = numHosts;
 
+        // give token to a host initially
+        Token.getInstance().setOwner(generateTokenHolder());
+
         // create hosts with addresses 1 - numHosts
         for(int i = 1; i <= _numHosts; i++) {
 
@@ -265,5 +268,14 @@ public class Simulation {
         u = gen.nextDouble();
 
         return(((-1) / rate) * Math.log(1 - u));
+    }
+
+    /**
+     * generate address to give host token
+     * @return new token holder
+     */
+    private int generateTokenHolder() {
+
+        return (new Random().nextInt(_numHosts) + 1);
     }
 }

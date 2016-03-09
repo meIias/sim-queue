@@ -1,5 +1,32 @@
 /**
- * Created by moeelias on 3/8/16.
+ * Token singleton class
+ *
+ * Authors: Muhammad Elias, Charlie Ng
  */
 public class Token {
+
+    private int _owner;
+
+    private static Token _token;
+
+    private Token() {}
+
+    public static Token getInstance() {
+
+        if(_token == null) {
+
+            _token = new Token();
+        }
+        return _token;
+    }
+
+    public void setOwner(int newOwner) {
+
+        _owner = newOwner;
+    }
+
+    public int getOwner() {
+
+        return _owner;
+    }
 }

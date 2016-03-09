@@ -1,7 +1,9 @@
 import java.util.LinkedList;
 
 /**
- * Created by moeelias on 3/8/16.
+ * Host class
+ *
+ * Authors: Muhammad Elias, Charlie Ng
  */
 public class Host {
 
@@ -14,7 +16,7 @@ public class Host {
     public Host(int addr) {
 
         this.address = addr;
-        this.hasToken = false;
         this.packetQueue = new LinkedList<Packet>();
+        this.hasToken = (Token.getInstance().getOwner() == addr);
     }
 }
