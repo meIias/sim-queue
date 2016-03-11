@@ -10,16 +10,8 @@ public class Packet {
     public double length;
     public int destination;
     public int hostAddress;
-    public double serviceTime;
 
-    public Packet(double serviceTime) {
-
-        this.serviceTime = serviceTime;
-    }
-
-    public Packet(int numHosts, int hostAddress, double serviceTime) {
-
-        this.serviceTime = serviceTime;
+    public Packet(int numHosts, int hostAddress) {
 
         this.hostAddress = hostAddress;
 
@@ -32,6 +24,4 @@ public class Packet {
         }
         this.destination = dest;
     }
-
-    public double getServiceTime() { return serviceTime; }
 }

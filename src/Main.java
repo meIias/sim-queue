@@ -23,9 +23,9 @@ public class Main {
             s.runSimulation(
                     EXPERIMENT_A_NUM_HOSTS,
                     EXPERIMENT_LAMBDAS[i],
-                    1,
                     Double.POSITIVE_INFINITY
             );
+            break;
         }
     }
 }

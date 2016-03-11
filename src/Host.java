@@ -13,10 +13,13 @@ public class Host {
 
     public LinkedList<Packet> packetQueue;
 
+    public LinkedList<Packet> receivedPackets;
+
     public Host(int addr) {
 
         this.address = addr;
         this.packetQueue = new LinkedList<Packet>();
+        this.receivedPackets = new LinkedList<Packet>();
         this.hasToken = (Token.getInstance().getOwner() == addr);
     }
 }

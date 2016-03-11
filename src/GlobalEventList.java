@@ -115,7 +115,7 @@ public class GlobalEventList {
      */
     public Event removeFront() {
 
-        if (_length == 0) {
+        if (_length == 0 || _head == null) {
             return null;
         }
 

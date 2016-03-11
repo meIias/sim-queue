@@ -1,3 +1,4 @@
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -25,34 +26,9 @@ public class Simulation {
     private double _interArrivalRate;
 
     /**
-     * to generate packet transmission/service time. μ
-     */
-    private double _transmissionRate;
-
-    /**
      * current time
      */
     private double _time;
-
-    /**
-     * number of packets in queue
-     */
-    private int _length;
-
-    /**
-     * What fraction of the time is the server busy
-     */
-    private double _serverUtilization;
-
-    /**
-     * mean number of packets in the queue as seen by a new arriving packet
-     */
-    private double _meanQueueLength;
-
-    /**
-     * Number of packets dropped with different λ values
-     */
-    private int _numPacketsDropped;
 
     /**
      * instance of gel to keep track of events
@@ -60,162 +36,145 @@ public class Simulation {
     private GlobalEventList _globalEventList;
 
     /**
-     * fifo queue for packets
-     */
-    private LinkedList<Packet> _packetQueue;
-
-    /**
      * store hosts
      */
     private LinkedList<Host> _hosts;
 
-    public void runSimulation(int numHosts, double interArrivalRate, double transmissionRate, double maxBuffer) {
+    /**
+     * all packets currently sent around the ring
+     */
+    private LinkedList<Packet> _frame;
 
-        initialize(numHosts, interArrivalRate, transmissionRate, maxBuffer);
+    /**
+     * total length of transmitted packets
+     */
+    private double _throughput;
 
-        /**
-         * 1. get the first event from the GEL;
-         * 2. If the event is an arrival then process-arrival-event;
-         * 3. Otherwise it must be a departure event and hence
-         * process-service-completion;
-         */
-        for(int i = 0; i < 100000; i++) {
+    public void runSimulation(int numHosts, double interArrivalRate, double maxBuffer) {
 
-            Event event = _globalEventList.removeFront();
+        initialize(numHosts, interArrivalRate, maxBuffer);
 
-            // no more events
-            if(event == null) {
+        // steps
+        for(int i = 0; i < 10; i++) {
 
-                break;
+            Event e = _globalEventList.removeFront();
+
+            if(e == null) {
+
+                e = new Event(
+                        _time + negativeExponentiallyDistributedTime(_interArrivalRate),
+                        ""
+                );
             }
 
-            if(event.getType().equals("arrival")) {
+            // token holder releases transmits all packets, put into a frame
+            processDepartureEvent(e);
 
-                processArrivalEvent(event);
-            }
-            else {
+            // who has received the frame
+            int currentHost = Token.getInstance().getOwner() + 1;
+            if(currentHost >= _numHosts) {
 
-                processDepartureEvent(event);
+                currentHost = 0;
             }
+
+            // how many hosts received the frame
+            int hostsTraversed = 0;
+
+            // while we haven't returned to the token holder
+            while(hostsTraversed != _numHosts) {
+
+                // loop around if we reached the end
+                if(currentHost >= _numHosts) {
+
+                    currentHost = 0;
+                }
+
+                // add frame to the host
+                processArrivalEvent(e, currentHost);
+
+                // increment number of hosts visited
+                hostsTraversed++;
+
+                // move to the next host
+                currentHost++;
+            }
+
+            // we've returned to the token holder, give token to someone else
+            _hosts.get(Token.getInstance().getOwner()).hasToken = false;
+            int nextTokenHost = Token.getInstance().getOwner() + 1;
+            if(nextTokenHost > _numHosts - 1) {
+
+                nextTokenHost = 0;
+            }
+            Token.getInstance().setOwner(nextTokenHost);
+            _hosts.get(nextTokenHost).hasToken = true;
         }
 
         outputStatistics();
     }
 
+    /**
+     * source host transmits all packets, put them in frame
+     */
     private void processDepartureEvent(Event event) {
 
-        //set current time to event time
-        double oldTime = _time;
         _time = event.getTime();
 
-        // update stats
-        _meanQueueLength += (_length * (_time - oldTime));
+        _frame.clear();
 
-        // decrement the length since this is a packet departure
-        _length--;
+        // add all packets to frame for release
+        Host tokenHolder = _hosts.get(Token.getInstance().getOwner());
+        while(tokenHolder.packetQueue.size() > 0) {
 
-        // if queue
-        if(_length > 0) {
+            Packet p = tokenHolder.packetQueue.remove(0);
 
-            // dequeue the first packet
-            Packet curPacket = _packetQueue.remove(0);
-
-            // new departure time is packet service time plus transmission time
-            double departureEventTime = _time + curPacket.getServiceTime();
-
-            // insert new departure event
-            _globalEventList.insert(new Event(departureEventTime, "departure"));
+            _frame.add(p);
         }
-        else if(_length == 0) {
-
-            // todo RELEASE TOKEN
-        }
-        else {
-
-            System.out.println("**** ERROR: queue length is negative ****");
-        }
+        _hosts.set(Token.getInstance().getOwner(), tokenHolder);
     }
 
     /**
      * process arrival event
-     *
-     * @param event event at front of GEL
      */
-    private void processArrivalEvent(Event event) {
+    private void processArrivalEvent(Event event, int index) {
 
-        double oldTime = _time;
         _time = event.getTime();
 
-        if(oldTime != 0) {
+        // add all packets to next host
+        Host h = _hosts.get(index);
+        for(Packet p : _frame) {
 
-            _meanQueueLength += (_length * (_time - oldTime));
+            h.receivedPackets.add(p);
+
+            _throughput += p.length;
+
+            _globalEventList.insert(new Event(
+                    _time + negativeExponentiallyDistributedTime(_interArrivalRate),
+                    "arrival")
+            );
         }
-
-        // find time of next arrival
-        double nextArrivalTime = _time + negativeExponentiallyDistributedTime(_interArrivalRate);
-
-        // create a new packet with its service time
-        double newPacketServiceTime = negativeExponentiallyDistributedTime(_transmissionRate);
-        Packet newPacket = new Packet(newPacketServiceTime);
-
-        // create and insert a new arrival time
-        _globalEventList.insert(new Event(nextArrivalTime, "arrival"));
-
-        // process the arrive event
-        if(_length == 0) {
-
-            // server is free, immediately schedule for transmission
-
-            // new departure time is packet service time plus current time
-            double departureEventTime = newPacket.getServiceTime() + _time;
-
-            // insert new departure event
-            _globalEventList.insert(new Event(departureEventTime, "departure"));
-
-            _length++;
-
-            // update stats
-            _serverUtilization += newPacketServiceTime;
-        }
-        else if(_length > 0) {
-
-            // server is busy, queue
-
-            if(_length < _maxBuffer) {
-
-                // add packet to queue
-                _packetQueue.push(newPacket);
-                _length++;
-
-                // update stats
-                _serverUtilization += newPacketServiceTime;
-            }
-            else {
-
-                // drop packet
-                _numPacketsDropped++;
-            }
-        }
+        _hosts.set(index, h);
     }
 
     /**
      * initialize all variables, insert first event into GEL
-     *
-     * @param interArrivalRate  λ
-     * @param transmissionRate  μ
-     * @param maxBuffer         max num packets allowed in queue
      */
-    private void initialize(int numHosts, double interArrivalRate, double transmissionRate, double maxBuffer) {
+    private void initialize(int numHosts, double interArrivalRate, double maxBuffer) {
 
         _numHosts = numHosts;
 
-        // give token to a host initially
-        Token.getInstance().setOwner(generateTokenHolder());
-
         // create hosts with addresses 1 - numHosts
+        _hosts = new LinkedList<Host>();
         for(int i = 0; i < _numHosts; i++) {
 
             _hosts.add(new Host(i));
+        }
+
+        // create a bunch of packets randomly and send to hosts
+        for(int i = 0; i < 100; i++) {
+
+            Packet p = new Packet(_numHosts, generateTokenHolder());
+            _hosts.get(p.hostAddress).packetQueue.add(p);
         }
 
         // max num packets
@@ -223,43 +182,34 @@ public class Simulation {
 
         // init data structures
         _time = 0;
-        _length = 0;
-        _meanQueueLength = 0;
-        _serverUtilization = 0;
-        _numPacketsDropped = 0;
-        _packetQueue = new LinkedList<Packet>();
+        _throughput = 0;
+        _frame = new LinkedList<Packet>();
         _globalEventList = new GlobalEventList();
 
         // init packet arrival and service times
         _interArrivalRate = interArrivalRate;
-        _transmissionRate = transmissionRate;
 
-        // init gel w/ first event
-        double firstEventTime = _time + negativeExponentiallyDistributedTime(_interArrivalRate);
-        _globalEventList.insert(new Event(firstEventTime, "arrival"));
+        // give token to a host initially
+        Token.getInstance().setOwner(generateTokenHolder());
+        _hosts.get(Token.getInstance().getOwner()).hasToken = true;
+
+        // create start event
+        _globalEventList.insert(new Event(0, ""));
     }
 
     /**
      * Collecting Statistics
-     *
-     * Mean queue length, server utilization, num packets dropped
      */
     private void outputStatistics() {
 
-        System.out.println("λ: " + _interArrivalRate + "   μ: " + _transmissionRate + "   max_buffer: " + _maxBuffer + "   " + "time: " + _time);
+        System.out.println("throughput: " + _throughput);
+        System.out.println("time: " + _time);
+        System.out.println("throughput/time: " + _throughput/_time);
 
-        System.out.println("Server utilization: " + (_serverUtilization / _time));
-
-        System.out.println("Mean queue length: " + (_meanQueueLength / _time));
-
-        System.out.println("Number of packets dropped: " + _numPacketsDropped + "\n");
     }
 
     /**
      * random variable following negative exponential distribution
-     *
-     * @param rate  λ or μ
-     * @return      random variable
      */
     private double negativeExponentiallyDistributedTime(double rate) {
 
@@ -272,7 +222,6 @@ public class Simulation {
 
     /**
      * generate address to give host token
-     * @return new token holder
      */
     private int generateTokenHolder() {
 
