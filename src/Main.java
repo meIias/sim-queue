@@ -1,3 +1,9 @@
+/**
+ * Main class
+ * Test token ring protocol
+ *
+ * Authors: Muhammad Elias, Charlie Ng
+ */
 public class Main {
 
     private static Simulation s;
@@ -14,6 +20,9 @@ public class Main {
 
         System.out.println("**** EXPERIMENT A ****");
         experimentA();
+
+        System.out.println("\n**** EXPERIMENT B ****");
+        experimentB();
     }
 
     public static void experimentA() {
@@ -25,7 +34,18 @@ public class Main {
                     EXPERIMENT_LAMBDAS[i],
                     Double.POSITIVE_INFINITY
             );
-            break;
+        }
+    }
+
+    public static void experimentB() {
+
+        for(int i = 0 ; i < EXPERIMENT_LAMBDAS.length; i++) {
+
+            s.runSimulation(
+                    EXPERIMENT_B_NUM_HOSTS,
+                    EXPERIMENT_LAMBDAS[i],
+                    Double.POSITIVE_INFINITY
+            );
         }
     }
 }

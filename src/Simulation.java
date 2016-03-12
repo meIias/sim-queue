@@ -1,10 +1,9 @@
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
 
 /**
  * Simulation class
- * discrete-event simulation model
+ * token ring protocol simulation
  *
  * Authors: Muhammad Elias, Charlie Ng
  */
@@ -50,32 +49,26 @@ public class Simulation {
      */
     private double _throughput;
 
+    /**
+     * average packet delay
+     */
+    private double _packetDelay;
+
+    /**
+     * main code
+     */
     public void runSimulation(int numHosts, double interArrivalRate, double maxBuffer) {
 
         initialize(numHosts, interArrivalRate, maxBuffer);
 
         // steps
-        for(int i = 0; i < 10; i++) {
-
-            Event e = _globalEventList.removeFront();
-
-            if(e == null) {
-
-                e = new Event(
-                        _time + negativeExponentiallyDistributedTime(_interArrivalRate),
-                        ""
-                );
-            }
+        for(int i = 0; i < 100000; i++) {
 
             // token holder releases transmits all packets, put into a frame
-            processDepartureEvent(e);
+            processDepartureEvent();
 
             // who has received the frame
             int currentHost = Token.getInstance().getOwner() + 1;
-            if(currentHost >= _numHosts) {
-
-                currentHost = 0;
-            }
 
             // how many hosts received the frame
             int hostsTraversed = 0;
@@ -90,7 +83,7 @@ public class Simulation {
                 }
 
                 // add frame to the host
-                processArrivalEvent(e, currentHost);
+                processArrivalEvent(currentHost);
 
                 // increment number of hosts visited
                 hostsTraversed++;
@@ -99,15 +92,7 @@ public class Simulation {
                 currentHost++;
             }
 
-            // we've returned to the token holder, give token to someone else
-            _hosts.get(Token.getInstance().getOwner()).hasToken = false;
-            int nextTokenHost = Token.getInstance().getOwner() + 1;
-            if(nextTokenHost > _numHosts - 1) {
-
-                nextTokenHost = 0;
-            }
-            Token.getInstance().setOwner(nextTokenHost);
-            _hosts.get(nextTokenHost).hasToken = true;
+            releaseToken();
         }
 
         outputStatistics();
@@ -116,9 +101,7 @@ public class Simulation {
     /**
      * source host transmits all packets, put them in frame
      */
-    private void processDepartureEvent(Event event) {
-
-        _time = event.getTime();
+    private void processDepartureEvent() {
 
         _frame.clear();
 
@@ -128,6 +111,13 @@ public class Simulation {
 
             Packet p = tokenHolder.packetQueue.remove(0);
 
+            _time += negativeExponentiallyDistributedTime(1);
+
+            _globalEventList.insert(new Event(
+                    _time,
+                    "departure"
+            ));
+
             _frame.add(p);
         }
         _hosts.set(Token.getInstance().getOwner(), tokenHolder);
@@ -136,65 +126,87 @@ public class Simulation {
     /**
      * process arrival event
      */
-    private void processArrivalEvent(Event event, int index) {
-
-        _time = event.getTime();
+    private void processArrivalEvent(int index) {
 
         // add all packets to next host
         Host h = _hosts.get(index);
+
         for(Packet p : _frame) {
 
             h.receivedPackets.add(p);
 
             _throughput += p.length;
 
+            _time += negativeExponentiallyDistributedTime(_interArrivalRate);
+
             _globalEventList.insert(new Event(
-                    _time + negativeExponentiallyDistributedTime(_interArrivalRate),
+                    _time,
                     "arrival")
             );
+
+            _packetDelay += 10;
         }
         _hosts.set(index, h);
     }
 
     /**
-     * initialize all variables, insert first event into GEL
+     * initialize all variables
      */
     private void initialize(int numHosts, double interArrivalRate, double maxBuffer) {
 
+        _time = 0;
+        _throughput = 0;
+        _packetDelay = 0;
         _numHosts = numHosts;
+        _maxBuffer = maxBuffer;
+        _interArrivalRate = interArrivalRate;
+
+        _hosts = new LinkedList<Host>();
+        _frame = new LinkedList<Packet>();
+        _globalEventList = new GlobalEventList();
 
         // create hosts with addresses 1 - numHosts
-        _hosts = new LinkedList<Host>();
         for(int i = 0; i < _numHosts; i++) {
 
             _hosts.add(new Host(i));
         }
 
         // create a bunch of packets randomly and send to hosts
-        for(int i = 0; i < 100; i++) {
+        for(int i = 0; i < 1000; i++) {
 
             Packet p = new Packet(_numHosts, generateTokenHolder());
             _hosts.get(p.hostAddress).packetQueue.add(p);
+
+            _time += negativeExponentiallyDistributedTime(1);
+
+            _globalEventList.insert(new Event(
+                    _time,
+                    "arrival"
+            ));
+
+            _packetDelay += 10;
         }
-
-        // max num packets
-        _maxBuffer = maxBuffer;
-
-        // init data structures
-        _time = 0;
-        _throughput = 0;
-        _frame = new LinkedList<Packet>();
-        _globalEventList = new GlobalEventList();
-
-        // init packet arrival and service times
-        _interArrivalRate = interArrivalRate;
 
         // give token to a host initially
         Token.getInstance().setOwner(generateTokenHolder());
         _hosts.get(Token.getInstance().getOwner()).hasToken = true;
+    }
 
-        // create start event
-        _globalEventList.insert(new Event(0, ""));
+    /**
+     * give token to next host
+     */
+    private void releaseToken() {
+
+        _hosts.get(Token.getInstance().getOwner()).hasToken = false;
+
+        int nextTokenHost = Token.getInstance().getOwner() + 1;
+        if(nextTokenHost > _numHosts - 1) {
+
+            nextTokenHost = 0;
+        }
+
+        Token.getInstance().setOwner(nextTokenHost);
+        _hosts.get(nextTokenHost).hasToken = true;
     }
 
     /**
@@ -202,10 +214,11 @@ public class Simulation {
      */
     private void outputStatistics() {
 
-        System.out.println("throughput: " + _throughput);
-        System.out.println("time: " + _time);
-        System.out.println("throughput/time: " + _throughput/_time);
-
+        System.out.println(
+                "λ: " + _interArrivalRate +
+                "       " + "Time: " + _time +
+                "       " + "Throughput: " + _throughput/_time +
+                "       " + "Packet Delay: " + _packetDelay/_time + "\n");
     }
 
     /**

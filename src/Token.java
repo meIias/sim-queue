@@ -16,6 +16,8 @@ public class Token {
         if(_token == null) {
 
             _token = new Token();
+
+            // initially no owner on create
             _token._owner = -1;
         }
         return _token;
