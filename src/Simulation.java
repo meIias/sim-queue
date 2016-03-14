@@ -62,7 +62,7 @@ public class Simulation {
         initialize(numHosts, interArrivalRate, maxBuffer);
 
         // steps
-        for(int i = 0; i < 100000; i++) {
+        for(int i = 0; i < 10; i++) {
 
             // token holder releases transmits all packets, put into a frame
             processDepartureEvent();
@@ -73,13 +73,19 @@ public class Simulation {
             // how many hosts received the frame
             int hostsTraversed = 0;
 
+            // for looping around hosts
+            int numToLoopAround = 0;
+
             // while we haven't returned to the token holder
-            while(hostsTraversed != _numHosts) {
+            while(hostsTraversed != _numHosts && currentHost != numToLoopAround) {
 
                 // loop around if we reached the end
                 if(currentHost >= _numHosts) {
 
+                    numToLoopAround = currentHost - _numHosts;
+
                     currentHost = 0;
+
                 }
 
                 // add frame to the host
@@ -93,9 +99,21 @@ public class Simulation {
             }
 
             releaseToken();
+            clearReceiveBuffers();
         }
 
         outputStatistics();
+    }
+
+    /**
+     * empty each host receive buffer for new token holder
+     */
+    private void clearReceiveBuffers() {
+
+        for(Host h : _hosts) {
+
+            h.receivedPackets.clear();
+        }
     }
 
     /**
@@ -134,6 +152,11 @@ public class Simulation {
         for(Packet p : _frame) {
 
             h.receivedPackets.add(p);
+
+            if(p.destination == h.address) {
+
+                h.packetQueue.add(p);
+            }
 
             _throughput += p.length;
 
@@ -218,7 +241,7 @@ public class Simulation {
                 "λ: " + _interArrivalRate +
                 "       " + "Time: " + _time +
                 "       " + "Throughput: " + _throughput/_time +
-                "       " + "Packet Delay: " + _packetDelay/_time + "\n");
+                "       " + "Packet Delay: " + _packetDelay/(Host.getNumPackets(_hosts) * 100000) + "\n");
     }
 
     /**
