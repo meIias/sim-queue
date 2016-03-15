@@ -62,7 +62,9 @@ public class Simulation {
         initialize(numHosts, interArrivalRate, maxBuffer);
 
         // steps
-        for(int i = 0; i < 10; i++) {
+        for(int i = 0; i < 50; i++) {
+
+            _packetDelay += 0.0001;
 
             // token holder releases transmits all packets, put into a frame
             processDepartureEvent();
@@ -73,19 +75,13 @@ public class Simulation {
             // how many hosts received the frame
             int hostsTraversed = 0;
 
-            // for looping around hosts
-            int numToLoopAround = 0;
-
             // while we haven't returned to the token holder
-            while(hostsTraversed != _numHosts && currentHost != numToLoopAround) {
+            while(hostsTraversed != _numHosts) {
 
                 // loop around if we reached the end
                 if(currentHost >= _numHosts) {
 
-                    numToLoopAround = currentHost - _numHosts;
-
                     currentHost = 0;
-
                 }
 
                 // add frame to the host
@@ -99,6 +95,7 @@ public class Simulation {
             }
 
             releaseToken();
+
             clearReceiveBuffers();
         }
 
@@ -167,7 +164,7 @@ public class Simulation {
                     "arrival")
             );
 
-            _packetDelay += 10;
+            _packetDelay += 0.0001;
         }
         _hosts.set(index, h);
     }
@@ -207,7 +204,7 @@ public class Simulation {
                     "arrival"
             ));
 
-            _packetDelay += 10;
+            _packetDelay += 0.0001;
         }
 
         // give token to a host initially
@@ -241,7 +238,7 @@ public class Simulation {
                 "λ: " + _interArrivalRate +
                 "       " + "Time: " + _time +
                 "       " + "Throughput: " + _throughput/_time +
-                "       " + "Packet Delay: " + _packetDelay/(Host.getNumPackets(_hosts) * 100000) + "\n");
+                "       " + "Packet Delay: " + _packetDelay/1000 + "\n");
     }
 
     /**

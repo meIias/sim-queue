@@ -22,16 +22,4 @@ public class Host {
         this.receivedPackets = new LinkedList<Packet>();
         this.hasToken = (Token.getInstance().getOwner() == addr);
     }
-
-    public static double getNumPackets(LinkedList<Host> hosts) {
-
-        double size = 0;
-
-        for(Host h : hosts) {
-
-            size += h.packetQueue.size();
-        }
-
-        return size;
-    }
 }
