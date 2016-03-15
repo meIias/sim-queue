@@ -1,0 +1,18 @@
+Analysis of Results:
+
+After running the simulation for a continuous amount of steps, we retrieved
+consistent numbers for both metrics. For the throughput, the values were
+similar for both Number of hosts, 10 and 25. The throughput values were also
+monotonically increasing, as we would expect. When the inter arrival rate is
+increased, the time taken decreases and more packets are able to be pushed
+through, which was consistent with our findings. The range of the throughput
+seems to be around 7.xx -- 6xx.xx, which is also a reasonable set of numbers
+given the fact that the rate was increasing from .01 packets/sec to the upper
+.9 packets/sec. Now for the average packet delay, the numbers we got for N = 10
+were close to each other, which is expected. The numbers for N = 25 are slightly
+larger than the N=10 values, but that was also expected. With an increased
+number of hosts there will be an increase, albeit small increase in packet
+delay. Also, the packet delay values are very small .005xx -- .006xx, which is
+also a reasonable result. We expect the avrage delay on a network to be very
+small, otherwise it may take too long to receive packets, and that is not
+correct.
