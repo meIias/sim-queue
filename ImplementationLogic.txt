@@ -1,0 +1,30 @@
+ a brief description of your Phase II implementation logic:
+
+For Phase II we were tasked with implementing a token ring network protocol.
+
+To do this, we used the following data structures:
+    1) We had a Host Class representing a host on the ring.
+        - The Host had an address, a queue to store it's packets, and
+          a receive buffer for frames received from other hosts.
+    2) Token singleton class to be passed around hosts.
+    3) Packet Class representing a packet of information.
+        - The Packets have a length, destination address, and host address.
+
+The general implementation logic is as follows: We created a list of hosts,
+representing the ring. After we created the hosts we populated their queues
+with packets randomly generated host address, destination address, and length.
+We created 1000 packets for the simulation. Then we initially designated a
+host with the token by marking a flag on that particular host, hasToken. Once
+the initialization phase is done we begin the main loop wherein we empty the
+token host's packet queue into a frame buffer variable inside a for loop, while
+incrementing all of our statistics variables. We use a counting variable to keep
+track of the token's position in the ring. So it starts at token holder's
+position + 1 and when the counter > #hosts, we "loop" by resetting to 0, so it
+loops. Then we begin the nested loop to pass the frame on to each host. When a
+host receives the frame, it places it into its receive buffer and collects any
+packets into it's own packet queue that have a destination of that host using if
+logic. Again incrementing our statistics variables. Then, once every host has
+received the frame and the frame is back at the token holding host, we release
+the token to the next host. After that we prepare all of the hosts for the frame
+given by the next token holding host. Then we continue the main process that was
+mentioned above. After the main loop is done we output all of our stats.
